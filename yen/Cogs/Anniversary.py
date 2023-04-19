@@ -182,7 +182,8 @@ class Anniversary(commands.Cog):
             
     @tasks.loop(minutes=1.0)
     async def reminder(self):
-        now: datetime.datetime = datetime.datetime.today()
+        now: datetime.datetime = datetime.datetime.now()
+        now = now.astimezone(self.timezone)
         if self.last_sent == None or (now - self.last_sent).days >= 1:
             dates: DateJSON = Anniversary.load_dates()
             for user_id in dates.keys():
@@ -190,6 +191,7 @@ class Anniversary(commands.Cog):
                 if user:
                     for date in dates[user_id]:
                         anniversary: datetime.datetime = datetime.datetime.strptime(date["date"], "%Y-%m-%d")
+                        anniversary = anniversary.astimezone(self.timezone)
                         if anniversary.month == now.month and anniversary.day == now.day:                
                             embed = discord.Embed(title=f"오늘은 기념일이에요! 🎉", color=0xFFFFFF)
                             embed.add_field(name="🔑 기념일", value=date['name'], inline=False)
@@ -202,7 +204,6 @@ class Anniversary(commands.Cog):
     async def day_checker(self):
         now: datetime.datetime = datetime.datetime.now()
         now = now.astimezone(self.timezone)
-        print(now)
         if now.hour == 8 and now.minute == 0:
             dates: DateJSON = Anniversary.load_dates()
             for user_id in dates:
