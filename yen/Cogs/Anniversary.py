@@ -206,7 +206,7 @@ class Anniversary(commands.Cog):
                 if user:
                     first_day: DateType = Anniversary.search_date_by_name(user_id, dates, "처음 사귄 날")
                     first_day_date: datetime.datetime = datetime.datetime.strptime(first_day["date"], "%Y-%m-%d")
-                    day_count: int = (now.date() - first_day_date).days
+                    day_count: int = (now - first_day_date).days
                     
                     await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count + 1}일째에요!❤")
     
