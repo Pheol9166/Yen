@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 from discord import app_commands
 from yen.type import DateJSON, DateType
 import datetime
+from pytz import timezone
 import json
 
 
@@ -14,6 +15,7 @@ class Anniversary(commands.Cog):
         self.reminder.start()
         self.day_checker.start()
         self.last_sent: Optional[datetime.datetime] = None
+        self.timezone = timezone('Asia/Seoul')
         
     @staticmethod
     def load_dates() -> DateJSON | dict:
@@ -199,6 +201,8 @@ class Anniversary(commands.Cog):
     @tasks.loop(minutes=1)
     async def day_checker(self):
         now: datetime.datetime = datetime.datetime.now()
+        now = now.astimezone(self.timezone)
+        print(now)
         if now.hour == 8 and now.minute == 0:
             dates: DateJSON = Anniversary.load_dates()
             for user_id in dates:
@@ -206,6 +210,7 @@ class Anniversary(commands.Cog):
                 if user:
                     first_day: DateType = Anniversary.search_date_by_name(user_id, dates, "처음 사귄 날")
                     first_day_date: datetime.datetime = datetime.datetime.strptime(first_day["date"], "%Y-%m-%d")
+                    first_day_date = first_day_date.astimezone(self.timezone)
                     day_count: int = (now - first_day_date).days
                     
                     await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count + 1}일째에요!❤")
