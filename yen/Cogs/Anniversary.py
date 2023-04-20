@@ -202,19 +202,18 @@ class Anniversary(commands.Cog):
     
     @tasks.loop(minutes=1)
     async def day_checker(self):
-        now: datetime.datetime = datetime.datetime.now()
-        now = now.astimezone(self.timezone)
-        if now.hour == 8 and now.minute == 0:
-            dates: DateJSON = Anniversary.load_dates()
-            for user_id in dates:
-                user: discord.User = self.bot.get_user(int(user_id))
-                if user:
-                    first_day: DateType = Anniversary.search_date_by_name(user_id, dates, "처음 사귄 날")
-                    first_day_date: datetime.datetime = datetime.datetime.strptime(first_day["date"], "%Y-%m-%d")
-                    first_day_date = first_day_date.astimezone(self.timezone)
-                    day_count: int = (now - first_day_date).days
-                    
-                    await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count + 1}일째에요!❤")
+        today: datetime.datetime = datetime.datetime.today()
+        today = today.astimezone(self.timezone)
+        dates: DateJSON = Anniversary.load_dates()
+        for user_id in dates:
+            user: discord.User = self.bot.get_user(int(user_id))
+            if user:
+                first_day: DateType = Anniversary.search_date_by_name(user_id, dates, "처음 사귄 날")
+                first_day_date: datetime.datetime = datetime.datetime.strptime(first_day["date"], "%Y-%m-%d")
+                first_day_date = first_day_date.astimezone(self.timezone)
+                day_count: int = (today - first_day_date).days
+                
+                await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count + 1}일째에요!❤")
     
     @reminder.before_loop
     async def before_reminder(self):
@@ -222,7 +221,13 @@ class Anniversary(commands.Cog):
     
     @day_checker.before_loop
     async def before_day_checker(self):
-        await self.bot.wait_until_ready()
+        now: datetime.datetime = datetime.datetime.now().astimezone(self.timezone)
+        target_time: datetime.datetime = datetime.datetime(now.year, now.month, now.day, 8)
+        target_time = target_time.astimezone(self.timezone)
+        if now > target_time:
+            target_time += datetime.timedelta(days=1)
+        
+        await discord.utils.sleep_until(target_time)
             
 async def setup(bot: commands.Bot):
     await bot.add_cog(
