@@ -200,7 +200,7 @@ class Anniversary(commands.Cog):
                             await user.send(f"{user.mention}님, 오늘은 {date['name']}이에요! ✨", embed=embed)
             self.last_sent = now
     
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=1.0)
     async def day_checker(self):
         now: datetime.datetime = datetime.datetime.now()
         now = now.astimezone(self.timezone)

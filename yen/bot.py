@@ -27,7 +27,7 @@ class Yen(commands.Bot):
             await self.tree.sync(guild= discord.Object(id=self.id))
             
     async def on_ready(self):
-        print(f"{self.user}가 디스코드에 연결되었어요!")
+        print(f"{self.user} online 🟢")
         
     async def on_disconnect(self):
         print(f"{self.user} offline 🔴")
