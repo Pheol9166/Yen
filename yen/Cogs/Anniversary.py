@@ -16,6 +16,7 @@ class Anniversary(commands.Cog):
         self.reminder.start()
         self.day_checker.start()
         self.timezone = timezone('Asia/Seoul')
+        self.last_sent: Optional[datetime.datetime] = None
         
     @staticmethod
     def load_dates() -> DateJSON | dict:
@@ -200,9 +201,9 @@ class Anniversary(commands.Cog):
             
     @tasks.loop(minutes=1.0)
     async def reminder(self):
-        now: datetime.datetime = datetime.datetime.now()
-        now =  now.astimezone(self.timezone)
-        if now.hour == 8 and now.minute == 0:
+        today: datetime.datetime = datetime.datetime.today()
+        today = today.astimezone(self.timezone)
+        if self.last_sent == None or (today - self.last_sent).days >= 1:
             dates: DateJSON = Anniversary.load_dates()
             for user_id in dates.keys():
                 user: discord.User = self.bot.get_user(int(user_id))
@@ -210,13 +211,14 @@ class Anniversary(commands.Cog):
                     for date in dates[user_id]:
                         anniversary: datetime.datetime = datetime.datetime.strptime(date["date"], "%Y-%m-%d")
                         anniversary = anniversary.astimezone(self.timezone)
-                        if anniversary.month == now.month and anniversary.day == now.day:                
+                        if anniversary.month == today.month and anniversary.day == today.day:                
                             embed = discord.Embed(title=f"오늘은 기념일이에요! 🎉", color=0xFFFFFF)
                             embed.add_field(name="🔑 기념일", value=date['name'], inline=False)
                             embed.add_field(name="📆 날짜", value=date['date'], inline=False)
             
                             await user.send(f"{user.mention}님, 오늘은 {date['name']}이에요! ✨", embed=embed)
-    
+        self.last_sent = today
+        
     @tasks.loop(minutes=1.0)
     async def day_checker(self):
         today: datetime.datetime = datetime.datetime.today()
