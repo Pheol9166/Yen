@@ -15,7 +15,6 @@ class Anniversary(commands.Cog):
         self.bot = bot
         self.reminder.start()
         self.day_checker.start()
-        self.last_sent: Optional[datetime.datetime] = None
         self.timezone = timezone('Asia/Seoul')
         
     @staticmethod
@@ -202,8 +201,8 @@ class Anniversary(commands.Cog):
     @tasks.loop(minutes=1.0)
     async def reminder(self):
         now: datetime.datetime = datetime.datetime.now()
-        now = now.astimezone(self.timezone)
-        if self.last_sent == None or (now - self.last_sent).days >= 1:
+        now =  now.astimezone(self.timezone)
+        if now.hour == 8 and now.minute == 0:
             dates: DateJSON = Anniversary.load_dates()
             for user_id in dates.keys():
                 user: discord.User = self.bot.get_user(int(user_id))
@@ -217,9 +216,8 @@ class Anniversary(commands.Cog):
                             embed.add_field(name="📆 날짜", value=date['date'], inline=False)
             
                             await user.send(f"{user.mention}님, 오늘은 {date['name']}이에요! ✨", embed=embed)
-            self.last_sent = now
     
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=1.0)
     async def day_checker(self):
         today: datetime.datetime = datetime.datetime.today()
         today = today.astimezone(self.timezone)
@@ -230,7 +228,7 @@ class Anniversary(commands.Cog):
                 first_day: DateType = Anniversary.search_date_by_name(user_id, dates, "처음 사귄 날")
                 first_day_date: datetime.datetime = datetime.datetime.strptime(first_day['date'], "%Y-%m-%d")
                 first_day_date = first_day_date.astimezone(self.timezone)
-                day_count: int = (today - first_day_date).days
+                day_count: int = (today.date() - first_day_date.date()).days
                 
                 await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count + 1}일째에요!❤")
     
