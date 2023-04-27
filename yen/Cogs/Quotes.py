@@ -73,7 +73,7 @@ class Quotes(commands.Cog):
                 await interaction.response.send_message(embed=embed)
         
     @app_commands.command(name="문구제거", description="예니가 추천하는 문구를 제거해요!(관리자용)")
-    @app_commands.describe(quote="추가할 문구")
+    @app_commands.describe(quote="제거할 문구")
     async def delete_quote(self, interaction: discord.Interaction, quote: str):
         if Quotes.check_admin(interaction):
             quotes: list[QuoteType] = Quotes.load_quotes()
@@ -89,32 +89,25 @@ class Quotes(commands.Cog):
             await interaction.response.send_message(embed=embed)                                
                     
     @app_commands.command(name="문구수정", description="예니가 추천하는 문구를 수정해요!(관리자용)")
-    @app_commands.describe(quote="추가할 문구", new_quote="새로운 문구", new_author="새로운 사람")
+    @app_commands.describe(quote="수정할 문구", new_quote="새로운 문구", new_author="새로운 사람")
     async def edit_quote(self, interaction: discord.Interaction, quote: str, new_quote: Optional[str]=None, new_author: Optional[str]=None):
         if Quotes.check_admin(interaction):
             quotes: list[QuoteType] = Quotes.load_quotes()
             quote_one: QuoteType = Quotes.search_quote(quotes, quote)
-            flag: int = 0
             embed = discord.Embed(title="문구가 수정되었어요!", color=0xffffff)
             
             if new_quote:
                 embed.add_field(name="📜 수정 전 문구", value=quote, inline=False)
                 embed.add_field(name="📔 수정 후 문구", value=f"***{new_quote}***", inline=False)
                 quote_one['quote'] = new_quote
-                flag = 1
                               
             if new_author:
                 embed.add_field(name="✏ 수정 전 사람", value=quote_one['person'], inline=False)
-                embed.add_field(name="🖋 수정 전 사람", value=new_author, inline=False)
+                embed.add_field(name="🖋 수정 후 사람", value=new_author, inline=False)
                 quote_one['person'] = new_author
-                flag = 1
             
-            if flag:
-                contents: list[str] = list(map(lambda x: x['quote'], quotes))
-                quotes[contents.index(quote)]: list[QuoteType] = quote_one            
-        
+            if new_quote or new_author:
                 Quotes.write_quotes(quotes)
-                                         
                 await interaction.response.send_message(embed=embed)
             else:
                 raise Exception
