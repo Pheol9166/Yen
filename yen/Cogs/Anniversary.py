@@ -9,7 +9,7 @@ from pytz import timezone
 import json
 
 
-#TODO: 검색 기능 추가
+#TODO: 검색 기능 추가, N주년 기념 메소드 제작
 class Anniversary(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -142,11 +142,12 @@ class Anniversary(commands.Cog):
         user_id = str(interaction.user.id)
         if Anniversary.check_duplicate_id(user_id):
             dates = Anniversary.load_dates()
-            dates[user_id].remove(date_name)
+            date = Anniversary.search_date_by_name(user_id, dates, date_name)
+            dates[user_id].remove(date)
             Anniversary.write_dates(dates)
             embed = discord.Embed(title="기념일을 제거했어요!", color=0xFFFFFF)
-            embed.add_field(name="🔑 제거된 기념일", value=date_name, inline=False)
-            embed.add_field(name="📆 날짜", value=date_name, inline=False)
+            embed.add_field(name="🔑 제거된 기념일", value=date['name'], inline=False)
+            embed.add_field(name="📆 날짜", value=date['date'], inline=False)
             
             await interaction.response.send_message(embed=embed)
         else:
