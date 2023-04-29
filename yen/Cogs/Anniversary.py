@@ -9,7 +9,7 @@ from pytz import timezone
 import json
 
 
-#TODO: 검색 기능 추가, N주년 기념 메소드 제작
+#TODO: 검색 기능 추가
 class Anniversary(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -231,9 +231,14 @@ class Anniversary(commands.Cog):
                     first_day: DateType = Anniversary.search_date_by_name(user_id, dates, "처음 사귄 날")
                     first_day_date: datetime.datetime = datetime.datetime.strptime(first_day['date'], "%Y-%m-%d")
                     first_day_date = first_day_date.astimezone(self.timezone)
-                    day_count: int = (now.date() - first_day_date.date()).days
+                    day_count: int = (now.date() - first_day_date.date()).days + 1
                     
-                    await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count + 1}일째에요!❤")
+                    if not day_count % 100:
+                        await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count}일째에요!❤ 축하드려요!🎉")
+                    elif not day_count % 365:
+                        await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count // 365}주년이에요!❤ 축하드려요!🎉")
+                    else:
+                        await user.send(f"{user.mention}님! 오늘은 {first_day['name']}로부터 {day_count}일째에요!❤")
     
     @reminder.before_loop
     async def before_reminder(self):
