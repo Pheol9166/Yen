@@ -2,6 +2,7 @@ from typing import Optional
 import discord
 from discord.ext import commands
 from discord import app_commands
+from discord.app_commands import Choice
 from yen.type import QuoteJSON, QuoteType
 import random
 import json
@@ -40,6 +41,10 @@ class Quotes(commands.Cog):
                 await interaction.response.send_message("관리자가 아니에요!")
         else:
             await interaction.response.send_message("이 명령은 서버에서만 실행될 수 있어요!")
+    
+    async def autocomplete_quote_param(self, interaction: discord.Interaction, value: str) -> list[Choice[str]]:
+        quotes: list[QuoteType] = Quotes.load_quotes()
+        return [Choice(name=quote['quote'], value=quote['quote']) for quote in quotes if value in quote['quote']]
        
     @app_commands.command(name="추천받기", description="예니가 사랑에 관한 문구를 추천해줘요!")
     async def recommend(self, interaction: discord.Interaction):
@@ -53,6 +58,7 @@ class Quotes(commands.Cog):
     
     @app_commands.command(name="문구추가", description="예니가 추천하는 문구를 추가해요!(관리자용)")
     @app_commands.describe(quote="추가할 문구", author="말한 사람")
+    @app_commands.autocomplete(quote=autocomplete_quote_param)
     async def add_quote(self, interaction: discord.Interaction, quote: str, author: str):
         if Quotes.check_admin(interaction):
             quotes: list[QuoteType] = Quotes.load_quotes()
@@ -74,6 +80,7 @@ class Quotes(commands.Cog):
         
     @app_commands.command(name="문구제거", description="예니가 추천하는 문구를 제거해요!(관리자용)")
     @app_commands.describe(quote="제거할 문구")
+    @app_commands.autocomplete(quote=autocomplete_quote_param)
     async def delete_quote(self, interaction: discord.Interaction, quote: str):
         if Quotes.check_admin(interaction):
             quotes: list[QuoteType] = Quotes.load_quotes()
@@ -90,6 +97,7 @@ class Quotes(commands.Cog):
                     
     @app_commands.command(name="문구수정", description="예니가 추천하는 문구를 수정해요!(관리자용)")
     @app_commands.describe(quote="수정할 문구", new_quote="새로운 문구", new_author="새로운 사람")
+    @app_commands.autocomplete(quote=autocomplete_quote_param)
     async def edit_quote(self, interaction: discord.Interaction, quote: str, new_quote: Optional[str]=None, new_author: Optional[str]=None):
         if Quotes.check_admin(interaction):
             quotes: list[QuoteType] = Quotes.load_quotes()

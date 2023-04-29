@@ -71,7 +71,12 @@ class Anniversary(commands.Cog):
                 return True
         except:
             return False
-        
+    
+    async def autocomplete_date_name_param(self, interaction: discord.Interaction, value: str) -> list[Choice[str]]:
+        user_id = str(interaction.user.id)
+        dates: list[DateType] = Anniversary.load_dates()[user_id]    
+        return [Choice(name=date['name'], value=date['name']) for date in dates if value in date['name']]        
+    
     @app_commands.command(name="설정하기", description="기념일을 처음 설정해요!")
     async def set_anniversary(self, interaction: discord.Interaction):
         user_id = str(interaction.user.id)
@@ -160,6 +165,7 @@ class Anniversary(commands.Cog):
         
     @app_commands.command(name="날짜수정", description="기념일을 수정해요!(설정이 되어있어야해요!)")
     @app_commands.describe(date_name="찾을 기념일 이름", new_name="새로운 이름", new_date="새로운 날짜")
+    @app_commands.autocomplete(date_name=autocomplete_date_name_param)
     async def edit_anniversary(self, interaction: discord.Interaction, date_name: str, new_name: Optional[str]=None, new_date: Optional[str]=None):
         user_id = str(interaction.user.id)
         if Anniversary.check_duplicate_id(user_id):
@@ -193,12 +199,7 @@ class Anniversary(commands.Cog):
                 await interaction.response.send_message("이름이나 날짜 둘 중 하나를 입력해주세요!")
         else:
             await interaction.response.send_message("기념일을 설정하지 않았어요... 설정하기 명령어를 통해 가능해요!")
-    @edit_anniversary.autocomplete("date_name")
-    async def autocomplete_date_name_param(self, interaction: discord.Interaction, value: str) -> list[Choice[str]]:
-        user_id = str(interaction.user.id)
-        dates: list[DateType] = Anniversary.load_dates()[user_id]    
-        return [Choice(name=date['name'], value=date['name']) for date in dates if value in date['name']]
-            
+
     @tasks.loop(minutes=1.0)
     async def reminder(self):
         now: datetime.datetime = datetime.datetime.now()
