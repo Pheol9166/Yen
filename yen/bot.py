@@ -1,8 +1,11 @@
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
 import os
 import json
 
+
+load_dotenv()
 
 class Yen(commands.Bot):
     def __init__(self):
@@ -12,9 +15,8 @@ class Yen(commands.Bot):
         )
         
         with open("./config.json", "r", encoding="utf-8") as f:
-            config = json.load(f)
-            self.token = config['Yen']['token']
-            self.id = config['Yen']['id']
+            self.token: str = os.environ.get('BOT_TOKEN')
+            self.id: int = int(os.environ.get('SERVER_ID'))
     
     def run(self):
         super().run(self.token)

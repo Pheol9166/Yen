@@ -3,9 +3,6 @@ from typing import TypedDict, Union
 
 JSON = dict[str, Union[None, int, str, bool, list, dict]]
 
-class Config(TypedDict):
-    Yen: dict[str, str]
-
 class QuoteType(TypedDict):
     quote: str
     person: str
