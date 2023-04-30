@@ -13,10 +13,8 @@ class Yen(commands.Bot):
             command_prefix='/',
             intents= discord.Intents.all()
         )
-        
-        with open("./config.json", "r", encoding="utf-8") as f:
-            self.token: str = os.environ.get('BOT_TOKEN')
-            self.id: int = int(os.environ.get('SERVER_ID'))
+        self.token: str = os.environ.get('BOT_TOKEN')
+        self.id: int = int(os.environ.get('SERVER_ID'))
     
     def run(self):
         super().run(self.token)
